@@ -1,163 +1,38 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vidriería Tucumán Pro - Kiosco El Sol</title>
-<script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-50 font-sans">
-<header class="bg-slate-900 text-white p-4 flex justify-between items-center">
-  <h1 class="font-bold text-xl">🔷 VIDRIERÍA TUCUMÁN PRO</h1>
-  <a href="#admin" class="bg-white text-slate-900 px-3 py-1 rounded text-sm font-bold">/admin</a>
-</header>
-
-<div id="app" class="max-w-6xl mx-auto p-4 grid md:grid-cols-2 gap-6 mt-4">
-  <!-- FORMULARIO -->
-  <div class="bg-white p-5 rounded-xl shadow">
-    <h2 class="font-bold text-lg mb-3">Nuevo Pedido - Kiosco El Sol</h2>
-    <div id="alerta" class="hidden p-3 rounded mb-3 text-sm"></div>
-    
-    <label class="text-sm font-bold">Cliente</label>
-    <input id="cliente" value="Kiosco El Sol" class="w-full border p-2 rounded mb-2">
-    
-    <div class="grid grid-cols-2 gap-2">
-      <div><label class="text-sm">Ancho (cm)</label><input id="ancho" type="number" value="100" class="w-full border p-2 rounded"></div>
-      <div><label class="text-sm">Alto (cm)</label><input id="alto" type="number" value="120" class="w-full border p-2 rounded"></div>
-    </div>
-    
-    <div class="grid grid-cols-2 gap-2 mt-2">
-      <div><label class="text-sm">Cantidad</label><input id="cant" type="number" value="1" class="w-full border p-2 rounded"></div>
-      <div><label class="text-sm">Zona</label>
-        <select id="zona" class="w-full border p-2 rounded">
-          <option>Yerba Buena</option>
-          <option>San Miguel</option>
-        </select>
-      </div>
-    </div>
-
-    <label class="text-sm mt-2 block">Tipo Vidrio</label>
-    <select id="tipo" class="w-full border p-2 rounded mb-3">
-      <option value="11570">Vidriera 4mm - $11.570/m2</option>
-      <option value="13840">Templado 6mm - $13.840/m2</option>
-      <option value="14400">Laminado - $14.400/m2</option>
-    </select>
-
-    <div class="flex items-center gap-2 mb-3">
-      <input type="checkbox" id="panos" checked><label for="panos" class="text-sm">¿Hay paños en stock? (Si está sin tilde, se bloquea)</label>
-    </div>
-
-    <button onclick="agregar()" class="w-full bg-blue-600 text-white p-3 rounded font-bold">+ AGREGAR A COLA</button>
-    <button onclick="cargarDemo()" class="w-full mt-2 bg-slate-200 p-2 rounded text-sm">Cargar 13 pedidos demo ($180.480)</button>
-  </div>
-
-  <!-- COLA -->
-  <div class="bg-white p-5 rounded-xl shadow">
-    <h2 class="font-bold text-lg">Cola de Producción - Urgencias</h2>
-    <p class="text-xs text-slate-500 mb-3">Agrupado automáticamente: Yerba Buena primero, luego San Miguel</p>
-    <div id="lista" class="space-y-2 max-h-[400px] overflow-auto"></div>
-    <div class="border-t mt-4 pt-3 flex justify-between items-center">
-      <span class="font-bold">TOTAL:</span>
-      <span id="total" class="font-bold text-xl text-blue-700">$0</span>
-    </div>
-    <div id="validacion" class="mt-2 text-xs text-red-600 font-bold"></div>
-  </div>
-</div>
-
-<!-- ADMIN -->
-<div id="admin-view" class="hidden max-w-md mx-auto mt-10 bg-white p-6 rounded-xl shadow">
-  <h2 class="font-bold text-xl mb-3">Admin Vidriería Tucumán</h2>
-  <input id="pass" type="password" placeholder="Contraseña" class="w-full border p-2 rounded mb-2">
-  <button onclick="login()" class="w-full bg-slate-900 text-white p-2 rounded">Entrar</button>
-  <div id="admin-data" class="hidden mt-4"></div>
-  <a href="#" class="text-sm text-blue-600 mt-4 block">← Volver</a>
-</div>
-
-<script>
-let pedidos = [];
-const STORAGE_KEY = 'tucuman_pro';
-
-function agregar(){
-  const ancho = parseInt(document.getElementById('ancho').value);
-  const alto = parseInt(document.getElementById('alto').value);
-  const cant = parseInt(document.getElementById('cant').value);
-  const zona = document.getElementById('zona').value;
-  const cliente = document.getElementById('cliente').value;
-  const tipoVal = parseInt(document.getElementById('tipo').value);
-  const tipoTxt = document.getElementById('tipo').options[document.getElementById('tipo').selectedIndex].text;
-  const hayPanos = document.getElementById('panos').checked;
-
-  if(!hayPanos){
-    mostrarAlerta('⛔ BLOQUEADO: No hay paños en stock. No se puede producir.','red'); return;
-  }
-  if(ancho > 150 || alto > 150){
-    document.getElementById('validacion').innerText = `⚠️ VALIDACIÓN: Vidrio ${ancho}x${alto}cm >150cm requiere refuerzo y transporte especial (+15%)`;
-  } else {
-    document.getElementById('validacion').innerText = '';
-  }
-  if(!ancho || !alto || !cant){ mostrarAlerta('Completa medidas','red'); return; }
-
-  const m2 = (ancho/100)*(alto/100);
-  let precio = m2 * tipoVal * cant;
-  if(ancho > 150 || alto > 150) precio *= 1.15;
-
-  pedidos.push({cliente, ancho, alto, cant, zona, tipoTxt, precio, m2, id: Date.now()});
-  render();
-  mostrarAlerta('Pedido agregado a cola '+zona,'green');
+<html lang='es'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'><title>Vidrieria Tucuman Pro - Completo</title><script src='https://cdn.tailwindcss.com'></script></head><body class='bg-slate-50'><div id='app'>Cargando...</div><script type='module'>
+import {createElement as h, useState, useEffect} from 'https://esm.sh/react@18.2.0';
+import {createRoot} from 'https://esm.sh/react-dom@18.2.0/client';
+const VIDRIOS=[{id:'float3',nombre:'float de 3 mm',precio:45000},{id:'float4',nombre:'float de 4 mm',precio:55000},{id:'laminado33',nombre:'laminado 3+3',precio:98000},{id:'templado6',nombre:'templado de 6 mm',precio:120000},{id:'templado10',nombre:'templado de 10 mm',precio:175000},{id:'espejo4',nombre:'espejo de 4 mm',precio:70000},{id:'espejoBis',nombre:'espejo de 4 mm biselado',precio:95000},{id:'fantasia4',nombre:'fantasia de 4 mm',precio:62000}];
+const LOCALIDADES=['San Miguel de Tucuman','Yerba Buena','Banda del Rio Sali','Tafi Viejo','Las Talitas','Alderetes'];
+const ESTADOS=['Pedido recibido','Medicion pendiente','Presupuestada','Aprobada','En corte','Lista para colocar','Colocada','Rechazada'];
+function calcM2(a,b){return +(a*b/10000).toFixed(2);} function fmt(n){return '$ '+n.toLocaleString('es-AR');}
+function App(){
+const [ordenes,setOrdenes]=useState(()=>{const s=localStorage.getItem('vt_ordenes');return s?JSON.parse(s):[]});
+const [config,setConfig]=useState(()=>{const s=localStorage.getItem('vt_config');return s?JSON.parse(s):{minimo:0.25,colocacionCosto:30000,claveAdmin:'tucuman2024'}});
+const [vista,setVista]=useState('lista');const [selId,setSelId]=useState(null);const [filtroUrg,setFiltroUrg]=useState(false);
+const [isAdmin,setIsAdmin]=useState(window.location.hash.includes('admin'));
+useEffect(()=>{localStorage.setItem('vt_ordenes',JSON.stringify(ordenes));},[ordenes]);
+useEffect(()=>{localStorage.setItem('vt_config',JSON.stringify(config));},[config]);
+useEffect(()=>{const fn=()=>setIsAdmin(window.location.hash.includes('admin'));window.addEventListener('hashchange',fn);return ()=>window.removeEventListener('hashchange',fn);},[]);
+const cargarDemo=()=>{const DEMO=[{cliente:'Kiosco El Sol',loc:'Yerba Buena',mot:'frente de 180 por 220',urg:true,est:'Medicion pendiente',pan:[{a:180,b:220,c:1,t:'float4'}]},{cliente:'Mariela Diaz',loc:'Tafi Viejo',mot:'2 ventanas de 80 por 110 en float de 4 mm',urg:true,est:'Pedido recibido',pan:[{a:80,b:110,c:2,t:'float4'}]},{cliente:'Roberto Sal',loc:'San Miguel de Tucuman',mot:'puerta balcon de 90 por 210',urg:true,est:'Presupuestada',pan:[{a:90,b:210,c:1,t:'templado10'}]},{cliente:'Paola Vega',loc:'Yerba Buena',mot:'espejo biselado de 120 por 80',urg:false,est:'Aprobada',pan:[{a:120,b:80,c:1,t:'espejoBis'}]},{cliente:'Farmacia Central',loc:'San Miguel de Tucuman',mot:'vidriera de 150 por 200 en laminado, urgente',urg:true,est:'En corte',pan:[{a:150,b:200,c:1,t:'laminado33'}]},{cliente:'Marta Rios',loc:'San Miguel de Tucuman',mot:'ventana en float',urg:false,est:'Colocada',pan:[{a:100,b:100,c:1,t:'float4'}]}];
+const nuevas=DEMO.map((d,i)=>{const m2=calcM2(d.pan[0].a,d.pan[0].b);const mf=Math.max(m2,config.minimo);const v=VIDRIOS.find(x=>x.id===d.pan[0].t);return {id:Date.now()+i,numero:1000+i,cliente:d.cliente,celular:'381 400000'+i,localidad:d.loc,direccion:'Calle '+i,motivo:d.mot,urgente:d.urg,fechaMedicion:new Date().toISOString().slice(0,10),panos:[{id:i,ancho:d.pan[0].a,alto:d.pan[0].b,cantidad:d.pan[0].c,tipoVidrio:d.pan[0].t,m2,m2Fact:mf,subtotal:Math.round(mf*v.precio*d.pan[0].c)}],colocacion:false,descuento:0,notas:'',estado:d.est,motivoRechazo:'',colocacionProvisoria:false};});setOrdenes(nuevas);};
+if(isAdmin){return h('div',{className:'max-w-3xl mx-auto p-4'},h('h1',{className:'text-2xl font-bold'},'Admin'),h('div',{className:'bg-white p-4 rounded shadow mt-4 space-y-4'},h('div',null,'Minimo m2: ',h('input',{type:'number',step:'0.01',value:config.minimo,onChange:e=>setConfig({...config,minimo:parseFloat(e.target.value)||0.25}),className:'border p-1 rounded'})),h('div',null,'Costo colocacion: ',h('input',{type:'number',value:config.colocacionCosto,onChange:e=>setConfig({...config,colocacionCosto:parseInt(e.target.value)||0}),className:'border p-1 rounded'})),h('a',{href:'#',onClick:()=>{window.location.hash='';setIsAdmin(false);},className:'text-blue-600'},'Volver')));}
+const lista=filtroUrg?ordenes.filter(o=>o.urgente&&o.estado!=='Colocada'&&o.estado!=='Rechazada'):ordenes;
+const sel=ordenes.find(o=>o.id===selId);
+if(vista==='detalle'&&sel){return h(Detalle,{orden:sel,config,setOrdenes,ordenes,setVista,VIDRIOS,LOCALIDADES,ESTADOS});}
+return h('div',{className:'min-h-screen'},h('header',{className:'bg-slate-900 text-white p-3 flex justify-between'},h('div',{className:'font-bold'},'VIDRIERIA TUCUMAN PRO'),h('a',{href:'#admin',className:'text-sm bg-white/20 px-2 py-1 rounded'},'/admin')),h('div',{className:'max-w-6xl mx-auto p-3'},h('div',{className:'flex gap-2 mb-3 flex-wrap'},h('button',{onClick:()=>{const n={id:Date.now(),numero:1000+ordenes.length,cliente:'Nuevo Cliente',celular:'381',localidad:LOCALIDADES[0],direccion:'',motivo:'',urgente:false,fechaMedicion:new Date().toISOString().slice(0,10),panos:[],colocacion:false,descuento:0,notas:'',estado:'Pedido recibido',motivoRechazo:'',colocacionProvisoria:false};setOrdenes([...ordenes,n]);setSelId(n.id);setVista('detalle');},className:'bg-blue-600 text-white px-4 py-2 rounded'},'+ Nuevo Pedido'),h('button',{onClick:cargarDemo,className:'bg-slate-200 px-3 py-2 rounded text-sm'},'Cargar pedidos demo'),h('button',{onClick:()=>setFiltroUrg(!filtroUrg),className:(filtroUrg?'bg-orange-500 text-white':'bg-white border')+' px-3 py-2 rounded text-sm'},filtroUrg?'Ver todos':'Cola urgencias')),filtroUrg?h('div',{className:'space-y-4'},h('h2',{className:'font-bold text-orange-600'},'Cola urgencias por localidad'),(()=>{const g={};lista.filter(o=>o.urgente).forEach(o=>{(g[o.localidad]=g[o.localidad]||[]).push(o);});return Object.entries(g).map(([loc,arr])=>h('div',{key:loc,className:'bg-white rounded shadow p-3'},h('h3',{className:'font-bold'},loc+' ('+arr.length+')'),arr.sort((a,b)=>(a.colocacionProvisoria?1:0)-(b.colocacionProvisoria?1:0)).map(o=>h('div',{key:o.id,className:'flex justify-between border-b py-2 cursor-pointer'+(o.colocacionProvisoria?' opacity-50':''),onClick:()=>{setSelId(o.id);setVista('detalle');}},h('span',{className:'text-sm'},'#'+o.numero+' '+o.cliente+' '+(o.colocacionProvisoria?'(provisoria)':'')),h('span',{className:'text-orange-600 font-bold text-xs'},'URGENTE')))));})()):h('div',{className:'bg-white rounded shadow divide-y'},h('div',{className:'p-2 text-xs text-slate-500'},'Guardado en localStorage - queda despues de recargar - Total: '+ordenes.length),ordenes.map(o=>h('div',{key:o.id,className:'p-3 flex justify-between hover:bg-slate-50 cursor-pointer'+(o.estado==='Colocada'?' bg-slate-100':'')+(o.urgente?' border-l-4 border-orange-500':''),onClick:()=>{setSelId(o.id);setVista('detalle');}},h('div',null,h('div',{className:'font-bold text-sm'},'#'+o.numero+' '+o.cliente+' - '+o.localidad),h('div',{className:'text-xs text-slate-500'},o.motivo+' | '+o.estado+(o.urgente?' | URGENTE':''))),h('div',{className:'text-sm font-bold'},fmt((o.panos||[]).reduce((s,p)=>s+(p.subtotal||0),0)+(o.colocacion?config.colocacionCosto:0)-(o.descuento||0)))))))));
 }
-
-function render(){
-  // Agrupar: Yerba Buena primero
-  pedidos.sort((a,b)=> a.zona===b.zona ? 0 : a.zona==='Yerba Buena' ? -1 : 1);
-  let html=''; let total=0;
-  pedidos.forEach(p=>{
-    total+=p.precio;
-    html+=`<div class="border p-2 rounded flex justify-between text-sm"><div><b>${p.zona}</b> - ${p.cliente}<br>${p.ancho}x${p.alto}cm x${p.cant} - ${p.tipoTxt}<br><span class="text-xs text-slate-500">${p.m2.toFixed(2)} m2</span></div><div class="font-bold">$${Math.round(p.precio).toLocaleString('es-AR')}</div></div>`;
-  });
-  document.getElementById('lista').innerHTML = html || '<p class="text-sm text-slate-400">Vacío. Agrega pedidos o carga demo.</p>';
-  document.getElementById('total').innerText = '$'+Math.round(total).toLocaleString('es-AR');
-  if(document.getElementById('admin-data')) document.getElementById('admin-data').innerHTML = html + '<hr><b>Total: $'+Math.round(total).toLocaleString('es-AR')+'</b>';
+function Detalle({orden,config,setOrdenes,ordenes,setVista,VIDRIOS,LOCALIDADES,ESTADOS}){
+const [form,setForm]=useState(orden);const [pForm,setPForm]=useState({ancho:'',alto:'',cantidad:1,tipoVidrio:'float4'});const [wa,setWa]=useState('');
+const isRO=form.estado==='Colocada';
+useEffect(()=>{const tot=(form.panos||[]).reduce((s,p)=>s+p.subtotal,0)+(form.colocacion?config.colocacionCosto:0)-(form.descuento||0);const tf=Math.max(0,tot);if(form.panos&&form.panos.length>0){const p0=form.panos[0];const v=VIDRIOS.find(x=>x.id===p0.tipoVidrio);setWa(`Hola ${form.cliente}, tu presupuesto: ${form.panos.length} ${v?v.nombre:'paño'} de ${p0.ancho} por ${p0.alto} cm. Total: ${fmt(tf)}`);}},[form.panos,form.colocacion,form.descuento,form.cliente]);
+const upd=(p)=>{if(isRO)return;setForm({...form,...p});};
+const addPano=()=>{const an=parseFloat(pForm.ancho),al=parseFloat(pForm.alto),ca=parseInt(pForm.cantidad);if(!an||!al){alert('Medidas fuera de rango: ingresa ancho y alto');return;}if(an<10||an>300||al<10||al>300){alert('Medidas fuera de rango (10-300 cm) y no se guardan');return;}const m2=calcM2(an,al);const mf=Math.max(m2,config.minimo);const vid=VIDRIOS.find(v=>v.id===pForm.tipoVidrio);const sub=Math.round(mf*vid.precio*ca);const esTL=pForm.tipoVidrio.includes('templado')||pForm.tipoVidrio.includes('laminado');if((an>150||al>150)&&!esTL){alert('Conviene templado o laminado para este tamaño');}setForm({...form,panos:[...(form.panos||[]),{id:Date.now(),ancho:an,alto:al,cantidad:ca,tipoVidrio:pForm.tipoVidrio,m2,m2Fact:mf,subtotal:sub}]});setPForm({ancho:'',alto:'',cantidad:1,tipoVidrio:pForm.tipoVidrio});};
+const guardar=()=>{const idx=ordenes.findIndex(o=>o.id===form.id);const n=[...ordenes];n[idx]=form;setOrdenes(n);setVista('lista');};
+const cambiarEst=(ne)=>{if(ne==='Aprobada'&&(!form.panos||form.panos.length===0)){alert('No se puede pasar de Presupuestada a Aprobada sin al menos un paño cargado');return;}if(ne==='Rechazada'){const mot=prompt('Motivo de rechazo:');if(!mot)return;upd({estado:ne,motivoRechazo:mot});}else{upd({estado:ne});}};
+const total=(form.panos||[]).reduce((s,p)=>s+p.subtotal,0)+(form.colocacion?config.colocacionCosto:0)-(form.descuento||0);const totalF=Math.max(0,total);
+const descargarICS=()=>{const dt=(form.fechaMedicion||'').replace(/-/g,'');const ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:Medicion ${form.cliente}\nDTSTART:${dt}T100000\nEND:VEVENT\nEND:VCALENDAR`;const b=new Blob([ics],{type:'text/calendar'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='medicion-'+form.cliente+'.ics';a.click();};
+return h('div',{className:'max-w-5xl mx-auto p-3'},h('button',{onClick:()=>setVista('lista'),className:'mb-2 bg-slate-200 px-2 py-1 rounded text-sm'},'← Volver'),h('div',{className:'bg-white rounded shadow p-4 grid md:grid-cols-2 gap-4'},h('div',{className:'space-y-2'},h('h2',{className:'font-bold'},'Ficha #'+form.numero+(isRO?' (solo lectura)':'')),h('input',{placeholder:'Cliente',value:form.cliente,onChange:e=>upd({cliente:e.target.value}),disabled:isRO,className:'border p-1 rounded w-full'}),h('input',{placeholder:'Celular',value:form.celular,onChange:e=>upd({celular:e.target.value}),disabled:isRO,className:'border p-1 rounded w-full'}),h('select',{value:form.localidad,onChange:e=>upd({localidad:e.target.value}),disabled:isRO,className:'border p-1 rounded w-full'},LOCALIDADES.map(l=>h('option',{key:l,value:l},l))),h('input',{placeholder:'Direccion',value:form.direccion,onChange:e=>upd({direccion:e.target.value}),disabled:isRO,className:'border p-1 rounded w-full'}),h('input',{placeholder:'Motivo',value:form.motivo,onChange:e=>upd({motivo:e.target.value}),disabled:isRO,className:'border p-1 rounded w-full'}),h('label',{className:'flex gap-2 text-sm'},h('input',{type:'checkbox',checked:form.urgente,onChange:e=>upd({urgente:e.target.checked}),disabled:isRO}),' Urgente'),h('label',{className:'flex gap-2 text-sm'},h('input',{type:'checkbox',checked:form.colocacionProvisoria,onChange:e=>upd({colocacionProvisoria:e.target.checked}),disabled:isRO}),' Colocacion provisoria hecha'),h('div',{className:'flex gap-2'},h('input',{type:'date',value:form.fechaMedicion,onChange:e=>upd({fechaMedicion:e.target.value}),disabled:isRO,className:'border p-1 rounded'}),h('button',{onClick:()=>upd({estado:'Presupuestada'}),className:'bg-blue-100 text-xs px-2 rounded'},'Ya tengo las medidas')),h('label',{className:'flex gap-2 text-sm'},h('input',{type:'checkbox',checked:form.colocacion,onChange:e=>upd({colocacion:e.target.checked}),disabled:isRO}),' Colocacion (+$'+config.colocacionCosto+')'),h('input',{type:'number',placeholder:'Descuento en pesos',value:form.descuento,onChange:e=>upd({descuento:parseInt(e.target.value)||0}),disabled:isRO,className:'border p-1 rounded w-full'}),h('textarea',{placeholder:'Notas',value:form.notas,onChange:e=>upd({notas:e.target.value}),disabled:isRO,className:'border p-1 rounded w-full'}),h('div',{className:'flex flex-wrap gap-1'},ESTADOS.map(es=>h('button',{key:es,onClick:()=>cambiarEst(es),disabled:isRO,className:(form.estado===es?'bg-blue-600 text-white':'bg-slate-100')+' px-2 py-1 rounded text-xs'},es))),form.estado==='Rechazada'&&h('div',{className:'text-sm text-red-600'},'Motivo: '+form.motivoRechazo)),h('div',null,h('h3',{className:'font-bold'},'Paños'),h('div',{className:'text-xs text-slate-500'},'Ancho x Alto / 10000 = m2. Si < '+config.minimo+' m2 se cobra minimo.'),h('div',{className:'border rounded p-2 mt-2'},h('div',{className:'grid grid-cols-2 gap-1'},h('input',{placeholder:'Ancho cm',type:'number',value:pForm.ancho,onChange:e=>setPForm({...pForm,ancho:e.target.value}),className:'border p-1 rounded'}),h('input',{placeholder:'Alto cm',type:'number',value:pForm.alto,onChange:e=>setPForm({...pForm,alto:e.target.value}),className:'border p-1 rounded'}),h('input',{placeholder:'Cant',type:'number',value:pForm.cantidad,onChange:e=>setPForm({...pForm,cantidad:e.target.value}),className:'border p-1 rounded'}),h('select',{value:pForm.tipoVidrio,onChange:e=>setPForm({...pForm,tipoVidrio:e.target.value}),className:'border p-1 rounded text-xs'},VIDRIOS.map(v=>h('option',{key:v.id,value:v.id},v.nombre+' $'+v.precio)))),h('button',{onClick:addPano,className:'w-full bg-blue-600 text-white py-1 rounded text-sm mt-1'},'+ Agregar paño (queda abierto, conserva tipo)')),h('div',{className:'mt-3 divide-y'},(form.panos||[]).map((p,i)=>h('div',{key:p.id,className:'py-1 text-sm flex justify-between'},h('span',null,(i+1)+'. '+p.ancho+'x'+p.alto+' x'+p.cantidad+' '+p.tipoVidrio+' = '+p.m2+'m2 fact '+p.m2Fact+' '+fmt(p.subtotal)),h('button',{onClick:()=>{if(isRO)return;setForm({...form,panos:form.panos.filter(x=>x.id!==p.id)});},className:'text-red-500'},'x')))),h('div',{className:'mt-3 font-bold border-t pt-2'},'TOTAL: '+fmt(totalF)),h('div',{className:'mt-4 space-y-2'},h('h4',{className:'font-bold text-sm'},'WhatsApp (editable)'),h('textarea',{value:wa,onChange:e=>setWa(e.target.value),className:'border p-1 rounded w-full text-sm'}),h('a',{href:'https://wa.me/'+(form.celular||'').replace(/\D/g,'')+'?text='+encodeURIComponent(wa),target:'_blank',className:'block bg-green-500 text-white text-center py-1 rounded text-sm'},'Compartir por WhatsApp'),h('button',{onClick:descargarICS,className:'w-full bg-slate-800 text-white py-1 rounded text-sm'},'Descargar visita .ics'),h('button',{onClick:guardar,disabled:isRO,className:'w-full bg-slate-900 text-white py-2 rounded mt-2'},'Guardar (queda en localStorage)'))))));
 }
-
-function cargarDemo(){
-  pedidos=[];
-  const base = [
-    {cliente:'Kiosco El Sol', ancho:100, alto:120, cant:1, zona:'Yerba Buena', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:80, alto:100, cant:1, zona:'Yerba Buena', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:120, alto:100, cant:1, zona:'Yerba Buena', tipoVal:13840},
-    {cliente:'Farmacia San Miguel', ancho:100, alto:100, cant:1, zona:'San Miguel', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:90, alto:110, cant:1, zona:'Yerba Buena', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:110, alto:110, cant:1, zona:'Yerba Buena', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:100, alto:90, cant:1, zona:'San Miguel', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:100, alto:100, cant:1, zona:'Yerba Buena', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:120, alto:120, cant:1, zona:'San Miguel', tipoVal:14400},
-    {cliente:'Kiosco El Sol', ancho:80, alto:120, cant:1, zona:'Yerba Buena', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:100, alto:150, cant:1, zona:'Yerba Buena', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:70, alto:100, cant:1, zona:'San Miguel', tipoVal:13840},
-    {cliente:'Kiosco El Sol', ancho:100, alto:110, cant:1, zona:'Yerba Buena', tipoVal:13840},
-  ];
-  // Ajustar para que sume EXACTO 180480
-  let suma=0; base.forEach(b=>{let m2=(b.ancho/100)*(b.alto/100); suma+=m2*b.tipoVal*b.cant;});
-  let factor = 180480/suma;
-  base.forEach(b=>{let m2=(b.ancho/100)*(b.alto/100); let precio=m2*b.tipoVal*b.cant*factor; pedidos.push({cliente:b.cliente, ancho:b.ancho, alto:b.alto, cant:b.cant, zona:b.zona, tipoTxt:'Templado 6mm', precio, m2, id:Math.random()});});
-  render();
-}
-
-function mostrarAlerta(txt,color){
-  const el=document.getElementById('alerta'); el.innerText=txt; el.className=`p-3 rounded mb-3 text-sm bg-${color}-100 text-${color}-700`; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'),3000);
-}
-function login(){
-  if(document.getElementById('pass').value==='tucuman2026'){
-    document.getElementById('admin-data').classList.remove('hidden');
-    render();
-    alert('Acceso correcto admin');
-  } else alert('Clave incorrecta. Usa tucuman2026');
-}
-window.addEventListener('hashchange',()=>{
-  if(location.hash==='#admin'){document.getElementById('app').classList.add('hidden'); document.getElementById('admin-view').classList.remove('hidden');}
-  else {document.getElementById('app').classList.remove('hidden'); document.getElementById('admin-view').classList.add('hidden');}
-});
-if(location.hash==='#admin') {document.getElementById('app').classList.add('hidden'); document.getElementById('admin-view').classList.remove('hidden');}
-</script>
-</body>
-</html>
+const root=createRoot(document.getElementById('app'));root.render(h(App));
+</script></body></html>
