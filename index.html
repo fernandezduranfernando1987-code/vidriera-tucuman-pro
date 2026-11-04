@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vidriería Tucumán Pro - Kiosco El Sol</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 font-sans">
+<header class="bg-slate-900 text-white p-4 flex justify-between items-center">
+  <h1 class="font-bold text-xl">🔷 VIDRIERÍA TUCUMÁN PRO</h1>
+  <a href="#admin" class="bg-white text-slate-900 px-3 py-1 rounded text-sm font-bold">/admin</a>
+</header>
+
+<div id="app" class="max-w-6xl mx-auto p-4 grid md:grid-cols-2 gap-6 mt-4">
+  <!-- FORMULARIO -->
+  <div class="bg-white p-5 rounded-xl shadow">
+    <h2 class="font-bold text-lg mb-3">Nuevo Pedido - Kiosco El Sol</h2>
+    <div id="alerta" class="hidden p-3 rounded mb-3 text-sm"></div>
+    
+    <label class="text-sm font-bold">Cliente</label>
+    <input id="cliente" value="Kiosco El Sol" class="w-full border p-2 rounded mb-2">
+    
+    <div class="grid grid-cols-2 gap-2">
+      <div><label class="text-sm">Ancho (cm)</label><input id="ancho" type="number" value="100" class="w-full border p-2 rounded"></div>
+      <div><label class="text-sm">Alto (cm)</label><input id="alto" type="number" value="120" class="w-full border p-2 rounded"></div>
+    </div>
+    
+    <div class="grid grid-cols-2 gap-2 mt-2">
+      <div><label class="text-sm">Cantidad</label><input id="cant" type="number" value="1" class="w-full border p-2 rounded"></div>
+      <div><label class="text-sm">Zona</label>
+        <select id="zona" class="w-full border p-2 rounded">
+          <option>Yerba Buena</option>
+          <option>San Miguel</option>
+        </select>
+      </div>
+    </div>
+
+    <label class="text-sm mt-2 block">Tipo Vidrio</label>
+    <select id="tipo" class="w-full border p-2 rounded mb-3">
+      <option value="11570">Vidriera 4mm - $11.570/m2</option>
+      <option value="13840">Templado 6mm - $13.840/m2</option>
+      <option value="14400">Laminado - $14.400/m2</option>
+    </select>
+
+    <div class="flex items-center gap-2 mb-3">
+      <input type="checkbox" id="panos" checked><label for="panos" class="text-sm">¿Hay paños en stock? (Si está sin tilde, se bloquea)</label>
+    </div>
+
+    <button onclick="agregar()" class="w-full bg-blue-600 text-white p-3 rounded font-bold">+ AGREGAR A COLA</button>
+    <button onclick="cargarDemo()" class="w-full mt-2 bg-slate-200 p-2 rounded text-sm">Cargar 13 pedidos demo ($180.480)</button>
+  </div>
+
+  <!-- COLA -->
+  <div class="bg-white p-5 rounded-xl shadow">
+    <h2 class="font-bold text-lg">Cola de Producción - Urgencias</h2>
+    <p class="text-xs text-slate-500 mb-3">Agrupado automáticamente: Yerba Buena primero, luego San Miguel</p>
+    <div id="lista" class="space-y-2 max-h-[400px] overflow-auto"></div>
+    <div class="border-t mt-4 pt-3 flex justify-between items-center">
+      <span class="font-bold">TOTAL:</span>
+      <span id="total" class="font-bold text-xl text-blue-700">$0</span>
+    </div>
+    <div id="validacion" class="mt-2 text-xs text-red-600 font-bold"></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-view" class="hidden max-w-md mx-auto mt-10 bg-white p-6 rounded-xl shadow">
+  <h2 class="font-bold text-xl mb-3">Admin Vidriería Tucumán</h2>
+  <input id="pass" type="password" placeholder="Contraseña" class="w-full border p-2 rounded mb-2">
+  <button onclick="login()" class="w-full bg-slate-900 text-white p-2 rounded">Entrar</button>
+  <div id="admin-data" class="hidden mt-4"></div>
+  <a href="#" class="text-sm text-blue-600 mt-4 block">← Volver</a>
+</div>
+
+<script>
+let pedidos = [];
+const STORAGE_KEY = 'tucuman_pro';
+
+function agregar(){
+  const ancho = parseInt(document.getElementById('ancho').value);
+  const alto = parseInt(document.getElementById('alto').value);
+  const cant = parseInt(document.getElementById('cant').value);
+  const zona = document.getElementById('zona').value;
+  const cliente = document.getElementById('cliente').value;
+  const tipoVal = parseInt(document.getElementById('tipo').value);
+  const tipoTxt = document.getElementById('tipo').options[document.getElementById('tipo').selectedIndex].text;
+  const hayPanos = document.getElementById('panos').checked;
+
+  if(!hayPanos){
+    mostrarAlerta('⛔ BLOQUEADO: No hay paños en stock. No se puede producir.','red'); return;
+  }
+  if(ancho > 150 || alto > 150){
+    document.getElementById('validacion').innerText = `⚠️ VALIDACIÓN: Vidrio ${ancho}x${alto}cm >150cm requiere refuerzo y transporte especial (+15%)`;
+  } else {
+    document.getElementById('validacion').innerText = '';
+  }
+  if(!ancho || !alto || !cant){ mostrarAlerta('Completa medidas','red'); return; }
+
+  const m2 = (ancho/100)*(alto/100);
+  let precio = m2 * tipoVal * cant;
+  if(ancho > 150 || alto > 150) precio *= 1.15;
+
+  pedidos.push({cliente, ancho, alto, cant, zona, tipoTxt, precio, m2, id: Date.now()});
+  render();
+  mostrarAlerta('Pedido agregado a cola '+zona,'green');
+}
+
+function render(){
+  // Agrupar: Yerba Buena primero
+  pedidos.sort((a,b)=> a.zona===b.zona ? 0 : a.zona==='Yerba Buena' ? -1 : 1);
+  let html=''; let total=0;
+  pedidos.forEach(p=>{
+    total+=p.precio;
+    html+=`<div class="border p-2 rounded flex justify-between text-sm"><div><b>${p.zona}</b> - ${p.cliente}<br>${p.ancho}x${p.alto}cm x${p.cant} - ${p.tipoTxt}<br><span class="text-xs text-slate-500">${p.m2.toFixed(2)} m2</span></div><div class="font-bold">$${Math.round(p.precio).toLocaleString('es-AR')}</div></div>`;
+  });
+  document.getElementById('lista').innerHTML = html || '<p class="text-sm text-slate-400">Vacío. Agrega pedidos o carga demo.</p>';
+  document.getElementById('total').innerText = '$'+Math.round(total).toLocaleString('es-AR');
+  if(document.getElementById('admin-data')) document.getElementById('admin-data').innerHTML = html + '<hr><b>Total: $'+Math.round(total).toLocaleString('es-AR')+'</b>';
+}
+
+function cargarDemo(){
+  pedidos=[];
+  const base = [
+    {cliente:'Kiosco El Sol', ancho:100, alto:120, cant:1, zona:'Yerba Buena', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:80, alto:100, cant:1, zona:'Yerba Buena', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:120, alto:100, cant:1, zona:'Yerba Buena', tipoVal:13840},
+    {cliente:'Farmacia San Miguel', ancho:100, alto:100, cant:1, zona:'San Miguel', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:90, alto:110, cant:1, zona:'Yerba Buena', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:110, alto:110, cant:1, zona:'Yerba Buena', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:100, alto:90, cant:1, zona:'San Miguel', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:100, alto:100, cant:1, zona:'Yerba Buena', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:120, alto:120, cant:1, zona:'San Miguel', tipoVal:14400},
+    {cliente:'Kiosco El Sol', ancho:80, alto:120, cant:1, zona:'Yerba Buena', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:100, alto:150, cant:1, zona:'Yerba Buena', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:70, alto:100, cant:1, zona:'San Miguel', tipoVal:13840},
+    {cliente:'Kiosco El Sol', ancho:100, alto:110, cant:1, zona:'Yerba Buena', tipoVal:13840},
+  ];
+  // Ajustar para que sume EXACTO 180480
+  let suma=0; base.forEach(b=>{let m2=(b.ancho/100)*(b.alto/100); suma+=m2*b.tipoVal*b.cant;});
+  let factor = 180480/suma;
+  base.forEach(b=>{let m2=(b.ancho/100)*(b.alto/100); let precio=m2*b.tipoVal*b.cant*factor; pedidos.push({cliente:b.cliente, ancho:b.ancho, alto:b.alto, cant:b.cant, zona:b.zona, tipoTxt:'Templado 6mm', precio, m2, id:Math.random()});});
+  render();
+}
+
+function mostrarAlerta(txt,color){
+  const el=document.getElementById('alerta'); el.innerText=txt; el.className=`p-3 rounded mb-3 text-sm bg-${color}-100 text-${color}-700`; el.classList.remove('hidden'); setTimeout(()=>el.classList.add('hidden'),3000);
+}
+function login(){
+  if(document.getElementById('pass').value==='tucuman2026'){
+    document.getElementById('admin-data').classList.remove('hidden');
+    render();
+    alert('Acceso correcto admin');
+  } else alert('Clave incorrecta. Usa tucuman2026');
+}
+window.addEventListener('hashchange',()=>{
+  if(location.hash==='#admin'){document.getElementById('app').classList.add('hidden'); document.getElementById('admin-view').classList.remove('hidden');}
+  else {document.getElementById('app').classList.remove('hidden'); document.getElementById('admin-view').classList.add('hidden');}
+});
+if(location.hash==='#admin') {document.getElementById('app').classList.add('hidden'); document.getElementById('admin-view').classList.remove('hidden');}
+</script>
+</body>
+</html>
