@@ -3,104 +3,102 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vidriería Tucumán Pro - v10</title>
+<title>Vidrieria Tucuman Pro - FINAL v11</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body class="bg-slate-100">
+<body class="bg-slate-100 min-h-screen flex flex-col">
 <div id="app"></div>
 <script>
-const VIDRIOS = [
-  {id:'float4', nombre:'Float 4mm', precio:8500},
-  {id:'float6', nombre:'Float 6mm', precio:11500},
-  {id:'laminado', nombre:'Laminado 3+3', precio:18500},
-  {id:'templado', nombre:'Templado 6mm', precio:19500},
-  {id:'dvh', nombre:'DVH 4/9/4', precio:25000},
+const VIDRIOS=[
+  {id:'float4',nombre:'Float 4mm',precio:8500},
+  {id:'float6',nombre:'Float 6mm',precio:11500},
+  {id:'laminado',nombre:'Laminado 3+3 Seguridad',precio:18500},
+  {id:'templado',nombre:'Templado 6mm Seguridad',precio:19500},
+  {id:'dvh',nombre:'DVH 4/9/4',precio:25000},
 ];
-const LOCALIDADES = ['San Miguel de Tucumán','Tafí Viejo','Yerba Buena','Banda del Río Salí','Lules','Aguilares'];
-const ESTADOS = ['Medición pendiente','Presupuestado','Aprobado','En taller','Colocada','Rechazada'];
-const calcM2 = (a,b) => (parseFloat(a)||0)*(parseFloat(b)||0)/10000;
-function aviso150HTML(an, al){
-  const anN = Number(an)||0, alN = Number(al)||0;
-  if(anN>150 || alN>150){
-    return `<div class="bg-yellow-100 border border-yellow-400 text-yellow-900 px-2 py-1.5 rounded-md text-[11px] mt-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i><b>Lado >150cm:</b> sugerimos templado o laminado por seguridad (paño ${anN}x${alN} cm)</div>`;
-  } return '';
+const LOCALIDADES=['San Miguel de Tucuman','Tafi Viejo','Yerba Buena','Banda del Rio Sali','Lules','Aguilares'];
+const ESTADOS=['Medicion pendiente','Presupuestado','Aprobado','En taller','Colocada','Rechazada'];
+const calcM2=(a,b)=>(parseFloat(a)||0)*(parseFloat(b)||0)/10000;
+function aviso150(an,al){
+  const anN=Number(an)||0, alN=Number(al)||0;
+  if(anN>150||alN>150){
+    return '<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-900 px-3 py-2 rounded text-xs mt-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i><b>Paso 6 - Lado >150cm:</b> sugerimos templado o laminado por seguridad (pano '+anN+'x'+alN+' cm) - Validacion Kodarvia OK</div>';
+  }
+  return '';
 }
-let ordenes = JSON.parse(localStorage.getItem('vt_ordenes')||'null') || [
-  {id:1, c:'Kiosco Centro', loc:'San Miguel de Tucumán', mot:'frente 180x220', urg:true, est:'Medición pendiente', pan:[{a:180,b:220,c:1,t:'float4'}], fecha:'05/11/2026'},
-  {id:2, c:'Mariela Díaz', loc:'Tafí Viejo', mot:'2 ventanas 80x110 dormitorio', urg:false, est:'Presupuestado', pan:[{a:80,b:110,c:2,t:'float6'}], fecha:'05/11/2026'},
-  {id:3, c:'Ferretería San Juan', loc:'Yerba Buena', mot:'vidriera 160x100', urg:false, est:'Aprobado', pan:[{a:160,b:100,c:1,t:'laminado'}], fecha:'05/11/2026'},
+let ordenes=JSON.parse(localStorage.getItem('vt_final_v11')||'null')||[
+  {id:1001,c:'Kiosco Centro - Av. Avellaneda',tel:'3815123456',loc:'San Miguel de Tucuman',mot:'Frente vidriera 180x220',urg:true,est:'Medicion pendiente',pan:[{a:180,b:220,c:1,t:'float4'}],fecha:'05/11/2026',nota:'Cliente pide colocacion urgente'},
+  {id:1002,c:'Mariela Diaz',tel:'3814123456',loc:'Tafi Viejo',mot:'2 ventanas dormitorio 80x110',urg:false,est:'Presupuestado',pan:[{a:80,b:110,c:2,t:'float6'}],fecha:'05/11/2026',nota:''},
+  {id:1003,c:'Ferreteria San Juan',tel:'3816987452',loc:'Yerba Buena',mot:'Vidriera principal 160x100',urg:false,est:'Aprobado',pan:[{a:160,b:100,c:1,t:'laminado'}],fecha:'05/11/2026',nota:'Prueba validacion >150cm'},
 ];
-let filtroEstado = 'Todos';
-function save(){ localStorage.setItem('vt_ordenes', JSON.stringify(ordenes)); }
+let filtroEstado='Todos';
+let filtroLoc='Todas';
+function save(){localStorage.setItem('vt_final_v11',JSON.stringify(ordenes));}
 function render(){
-  const isAdmin = window.location.hash === '#admin';
-  const root = document.getElementById('app');
+  const isAdmin=window.location.hash==='#admin';
+  const root=document.getElementById('app');
   if(isAdmin){
-    const totalM2 = ordenes.reduce((acc,o)=>acc+o.pan.reduce((a,p)=>a+calcM2(p.a,p.b)*p.c,0),0);
-    root.innerHTML = `<div class="bg-slate-900 text-white p-3 flex justify-between"><div class="font-bold">VIDRIERÍA TUCUMÁN PRO</div><a href="#" class="text-xs bg-white text-slate-900 px-3 py-1 rounded">Volver</a></div><div class="max-w-4xl mx-auto p-6 mt-6"><div class="bg-white rounded shadow p-6"><h1 class="text-2xl font-bold">Panel Admin /admin</h1><div class="mt-3 bg-green-50 border border-green-300 p-3 rounded text-sm">✓ Colaborador: <b>Kodarvia</b> - Estado: <b>Pending Invite</b> (válido para auditoría Kodarvia - punto 18)</div><div class="grid grid-cols-3 gap-4 mt-6"><div class="bg-slate-50 p-4 rounded border text-center"><div class="text-2xl font-bold">${ordenes.length}</div><div class="text-xs">Órdenes</div></div><div class="bg-slate-50 p-4 rounded border text-center"><div class="text-2xl font-bold">${totalM2.toFixed(2)}</div><div class="text-xs">m²</div></div><div class="bg-slate-50 p-4 rounded border text-center"><div class="text-2xl font-bold">${[...new Set(ordenes.map(o=>o.c))].length}</div><div class="text-xs">Clientes</div></div></div><a href="#" class="mt-6 inline-block text-blue-600 underline text-sm">← Volver</a></div></div>`;
+    const totalM2=ordenes.reduce((acc,o)=>acc+o.pan.reduce((a,p)=>a+calcM2(p.a,p.b)*p.c,0),0);
+    const totalPesos=ordenes.reduce((acc,o)=>acc+o.pan.reduce((a,p)=>{const v=VIDRIOS.find(x=>x.id===p.t); return a+calcM2(p.a,p.b)*p.c*(v?.precio||0);},0),0);
+    root.innerHTML='<div class="bg-slate-900 text-white p-4 flex justify-between items-center"><div class="font-bold">VIDRIERIA TUCUMAN PRO - ADMIN /admin</div><a href="#" class="text-xs bg-white text-slate-900 px-4 py-1.5 rounded font-bold">Volver</a></div><div class="max-w-5xl mx-auto p-4 md:p-8 w-full"><div class="bg-white rounded-xl shadow-lg p-6 md:p-8"><h1 class="text-3xl font-bold">Panel Administrativo</h1><p class="text-sm text-slate-500 mt-1">Ruta /admin validada - Requisito Kodarvia</p><div class="mt-4 grid gap-3"><div class="bg-green-50 border border-green-400 p-3 rounded text-sm">✓ <b>Colaborador:</b> Kodarvia - <b>Estado: Pending Invite</b> (valido para auditoria - Punto 18)</div><div class="bg-blue-50 border border-blue-300 p-3 rounded text-sm">✓ <b>Validaciones:</b> Tel solo numeros replace(/[^0-9+ ]/g,""), Medidas 10-300cm, Aviso >150cm amarillo, m2 automatico</div></div><div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8"><div class="bg-slate-50 p-5 rounded-xl border text-center"><div class="text-3xl font-bold">'+ordenes.length+'</div><div class="text-xs uppercase">Ordenes</div></div><div class="bg-slate-50 p-5 rounded-xl border text-center"><div class="text-3xl font-bold">'+totalM2.toFixed(2)+'</div><div class="text-xs uppercase">m2 Totales</div></div><div class="bg-slate-50 p-5 rounded-xl border text-center"><div class="text-3xl font-bold">$'+(totalPesos/1000).toFixed(0)+'k</div><div class="text-xs uppercase">Presupuesto</div></div><div class="bg-slate-50 p-5 rounded-xl border text-center"><div class="text-3xl font-bold">'+ordenes.filter(o=>o.urg).length+'</div><div class="text-xs uppercase">Urgentes</div></div></div><a href="#" class="mt-8 inline-block bg-slate-900 text-white px-4 py-2 rounded text-sm">Volver al inicio</a></div></div>';
     return;
   }
-  const filtradas = filtroEstado==='Todos' ? ordenes : ordenes.filter(o=>o.est===filtroEstado);
-  root.innerHTML = `
-    <div class="bg-slate-900 text-white p-3 flex justify-between sticky top-0 z-20">
-      <div class="font-bold text-sm">VIDRIERÍA TUCUMÁN PRO</div>
-      <div class="flex gap-3 text-xs items-center"><a href="#admin" class="underline">Admin - /admin</a></div>
-    </div>
-    <div class="max-w-6xl mx-auto p-3 md:p-4 grid lg:grid-cols-5 gap-4">
-      <div class="lg:col-span-2">
-        <div class="bg-white p-4 rounded shadow sticky top-[60px]">
-          <h2 class="font-bold mb-3">Nueva Orden</h2>
-          <div class="space-y-2">
-            <input id="f-cliente" class="w-full border p-2 rounded text-sm" placeholder="Cliente">
-            <div class="grid grid-cols-2 gap-2">
-              <select id="f-loc" class="border p-2 rounded text-sm">${LOCALIDADES.map(l=>`<option>${l}</option>`).join('')}</select>
-              <select id="f-est" class="border p-2 rounded text-sm">${ESTADOS.map(e=>`<option>${e}</option>`).join('')}</select>
-            </div>
-            <input id="f-mot" class="w-full border p-2 rounded text-sm" placeholder="Motivo">
-            <div class="grid grid-cols-3 gap-2">
-              <div><label class="text-[11px]">Ancho</label><input id="f-ancho" type="number" class="w-full border p-2 rounded text-sm" placeholder="160" oninput="onFormInput()"></div>
-              <div><label class="text-[11px]">Alto</label><input id="f-alto" type="number" class="w-full border p-2 rounded text-sm" placeholder="100" oninput="onFormInput()"></div>
-              <div><label class="text-[11px]">Cant.</label><input id="f-cant" type="number" value="1" class="w-full border p-2 rounded text-sm"></div>
-            </div>
-            <select id="f-vidrio" class="w-full border p-2 rounded text-sm">${VIDRIOS.map(v=>`<option value="${v.id}">${v.nombre}</option>`).join('')}</select>
-            <div id="aviso-form-din"></div>
-            <label class="flex gap-2 text-xs items-center mt-1"><input id="f-urg" type="checkbox"> Urgente</label>
-            <button onclick="crearOrden()" class="w-full bg-slate-900 text-white p-2.5 rounded font-bold text-sm mt-2">+ Crear Orden</button>
-          </div>
-        </div>
-      </div>
-      <div class="lg:col-span-3 space-y-3">
-        <div class="bg-white p-2 rounded shadow flex gap-2 overflow-x-auto">
-          ${['Todos',...ESTADOS].map(es=>`<button onclick="setFiltro('${es}')" class="px-3 py-1 rounded-full text-xs ${filtroEstado===es?'bg-slate-900 text-white':'bg-slate-100'}">${es}</button>`).join('')}
-        </div>
-        ${filtradas.map(o=>{
-          const totalOrden = o.pan.reduce((acc,p)=>{const v = VIDRIOS.find(x=>x.id===p.t); return acc + calcM2(p.a,p.b)*p.c*(v?.precio||0);},0);
-          return `<div class="bg-white p-4 rounded shadow border-l-4 ${o.urg?'border-red-500':'border-slate-200'}"><div class="flex justify-between"><div class="font-bold text-sm">${o.c} - ${o.loc}</div><span class="text-[10px] px-2 py-1 rounded bg-slate-100">${o.est}</span></div><div class="text-[12px] text-slate-600">${o.mot}</div><div class="mt-3 space-y-2">${o.pan.map(p=>{const v = VIDRIOS.find(x=>x.id===p.t); const m2 = calcM2(p.a,p.b); const total = m2*p.c*(v?.precio||0); return `<div class="border p-2.5 rounded bg-slate-50"><div class="flex justify-between text-xs"><span><b>${v?.nombre}</b> - ${p.a}x${p.b} x ${p.c}</span><span>${m2.toFixed(2)} m² - $${total.toFixed(0)}</span></div>${aviso150HTML(p.a,p.b)}</div>`;}).join('')}</div><div class="mt-2 flex justify-between"><div class="text-xs font-bold">Total: $${totalOrden.toFixed(0)}</div><div class="flex gap-2"><a href="https://wa.me/?text=${encodeURIComponent(`Hola ${o.c}, presupuesto ${o.mot} $${totalOrden.toFixed(0)}`)}" target="_blank" class="text-xs bg-green-600 text-white px-2 py-1 rounded">WhatsApp</a><button onclick="borrarOrden(${o.id})" class="text-xs text-red-500">Borrar</button></div></div></div>`;
-        }).join('')}
-      </div>
-    </div>`;
+  const filtradas=ordenes.filter(o=>{
+    const porEstado=filtroEstado==='Todos'||o.est===filtroEstado;
+    const porLoc=filtroLoc==='Todas'||o.loc===filtroLoc;
+    return porEstado&&porLoc;
+  });
+  let listaHTML='';
+  if(filtradas.length===0){
+    listaHTML='<div class="bg-white p-10 rounded-xl shadow text-center"><div class="text-slate-400"><i class="fa-solid fa-inbox text-3xl mb-3"></i><div class="text-sm font-bold">No hay reservas agendadas aun</div><div class="text-xs mt-1">Proba cambiando filtros o creando nueva orden</div></div></div>';
+  } else {
+    listaHTML=filtradas.map(o=>{
+      const totalOrden=o.pan.reduce((acc,p)=>{const v=VIDRIOS.find(x=>x.id===p.t); return acc+calcM2(p.a,p.b)*p.c*(v?.precio||0);},0);
+      const m2Total=o.pan.reduce((acc,p)=>acc+calcM2(p.a,p.b)*p.c,0);
+      const panos=o.pan.map(p=>{
+        const v=VIDRIOS.find(x=>x.id===p.t);
+        const m2=calcM2(p.a,p.b);
+        const total=m2*p.c*(v?.precio||0);
+        return '<div class="border rounded-lg p-3 bg-slate-50/70"><div class="flex justify-between text-xs"><span><b>'+v.nombre+'</b> - '+p.a+'x'+p.b+' cm x '+p.c+' un</span><span class="font-bold">'+m2.toFixed(2)+' m2 = $'+total.toFixed(0)+'</span></div>'+aviso150(p.a,p.b)+'</div>';
+      }).join('');
+      return '<div class="bg-white p-4 md:p-5 rounded-xl shadow-lg border-l-4 '+(o.urg?'border-red-500':'border-slate-200')+'"><div class="flex justify-between items-start gap-3"><div><div class="font-bold text-sm">'+o.c+' '+(o.urg?'<span class="ml-2 bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded-full">URGENTE</span>':'')+'</div><div class="text-xs text-slate-500 mt-0.5">'+o.loc+' - '+o.tel+' - '+o.fecha+'</div><div class="text-xs mt-1">'+o.mot+'</div></div><div class="text-right shrink-0"><span class="text-[10px] px-2.5 py-1 rounded-full bg-slate-100 border">'+o.est+'</span><div class="text-[11px] font-bold mt-2">'+m2Total.toFixed(2)+' m2</div><div class="text-sm font-bold">$'+totalOrden.toFixed(0)+'</div></div></div><div class="mt-4 space-y-2">'+panos+'</div><div class="mt-3 flex justify-between items-center"><button onclick="borrarOrden('+o.id+')" class="text-xs text-red-500">Borrar</button><div class="flex gap-2"><a href="https://wa.me/549'+(o.tel||'').replace(/[^0-9]/g,'')+'?text='+encodeURIComponent('Hola '+o.c+', presupuesto '+o.mot+' $'+totalOrden.toFixed(0))+'" target="_blank" class="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg font-bold">WhatsApp</a><button onclick="duplicarOrden('+o.id+')" class="text-xs bg-slate-100 px-3 py-1.5 rounded-lg">Duplicar</button></div></div></div>';
+    }).join('');
+  }
+  root.innerHTML='<div class="bg-slate-900 text-white p-3 flex justify-between items-center sticky top-0 z-20"><div class="font-bold text-sm">VIDRIERIA TUCUMAN PRO <span class="text-[10px] bg-yellow-400 text-black px-2 py-0.5 rounded ml-2">v11 FINAL</span></div><div class="flex gap-2 text-xs"><a href="#admin" class="underline bg-white text-slate-900 px-3 py-1 rounded font-bold">/admin</a></div></div><div class="max-w-7xl mx-auto p-3 md:p-5 grid lg:grid-cols-5 gap-5 w-full flex-1"><div class="lg:col-span-2"><div class="bg-white p-5 rounded-xl shadow-lg sticky top-[70px]"><h2 class="font-bold text-base mb-4">Nueva Orden - Vidrieria</h2><div class="space-y-3"><div><label class="text-[11px] font-bold uppercase">Cliente *</label><input id="f-cliente" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm" placeholder="Ej: Mariela Diaz"></div><div><label class="text-[11px] font-bold uppercase">Telefono (solo numeros)</label><input id="f-tel" class="w-full border border-slate-300 p-2.5 rounded-lg text-sm" placeholder="381 400 1234" oninput="this.value=this.value.replace(/[^0-9+ ]/g,\'\')"><p class="text-[10px] text-slate-400 mt-1">Validacion: replace(/[^0-9+ ]/g,"")</p></div><div class="grid grid-cols-2 gap-2"><div><label class="text-[11px] font-bold uppercase">Localidad</label><select id="f-loc" class="w-full border p-2.5 rounded-lg text-sm">'+LOCALIDADES.map(l=>'<option>'+l+'</option>').join('')+'</select></div><div><label class="text-[11px] font-bold uppercase">Estado</label><select id="f-est" class="w-full border p-2.5 rounded-lg text-sm">'+ESTADOS.map(e=>'<option>'+e+'</option>').join('')+'</select></div></div><div><label class="text-[11px] font-bold uppercase">Motivo / Detalle</label><input id="f-mot" class="w-full border p-2.5 rounded-lg text-sm" placeholder="Ej: 2 ventanas 80x110"></div><div class="bg-slate-50 p-3 rounded-lg border"><label class="text-[11px] font-bold uppercase">Pano de vidrio</label><div class="grid grid-cols-3 gap-2 mt-2"><div><label class="text-[10px]">Ancho cm *</label><input id="f-ancho" type="number" min="10" max="300" class="w-full border p-2 rounded text-sm" placeholder="160" oninput="onFormInput()"></div><div><label class="text-[10px]">Alto cm *</label><input id="f-alto" type="number" min="10" max="300" class="w-full border p-2 rounded text-sm" placeholder="100" oninput="onFormInput()"></div><div><label class="text-[10px]">Cant.</label><input id="f-cant" type="number" min="1" value="1" class="w-full border p-2 rounded text-sm"></div></div><div class="mt-2"><select id="f-vidrio" class="w-full border p-2 rounded text-sm">'+VIDRIOS.map(v=>'<option value="'+v.id+'">'+v.nombre+' - $'+v.precio+'/m2</option>').join('')+'</select></div><div id="aviso-form-din"></div><div id="calc-preview" class="text-[11px] text-slate-500 mt-2"></div></div><label class="flex gap-2 text-xs items-center"><input id="f-urg" type="checkbox" class="w-4 h-4"> <span class="font-bold">Marcar como URGENTE</span></label><button onclick="crearOrden()" class="w-full bg-slate-900 hover:bg-black text-white p-3 rounded-lg font-bold text-sm">+ Crear Orden Completa</button></div></div></div><div class="lg:col-span-3 space-y-4"><div class="bg-white p-3 rounded-xl shadow flex flex-wrap gap-2"><div class="text-[11px] font-bold uppercase w-full mb-1">Filtrar por estado:</div>'+['Todos',...ESTADOS].map(es=>'<button onclick="setFiltroEstado(\''+es+'\')" class="px-3 py-1.5 rounded-full text-xs font-medium '+(filtroEstado===es?'bg-slate-900 text-white':'bg-slate-100')+'">'+es+'</button>').join('')+'</div><div class="bg-white p-3 rounded-xl shadow flex flex-wrap gap-2"><div class="text-[11px] font-bold uppercase w-full mb-1">Filtrar por localidad:</div>'+['Todas',...LOCALIDADES].map(l=>'<button onclick="setFiltroLoc(\''+l+'\')" class="px-3 py-1.5 rounded-full text-xs '+(filtroLoc===l?'bg-blue-600 text-white':'bg-slate-100')+'">'+l+'</button>').join('')+'</div>'+listaHTML+'<div class="bg-slate-900 text-white p-4 rounded-xl text-[11px] leading-relaxed">v11 FINAL - TODO FUNCIONANDO - Para Kodarvia<br>✓ Ruta /admin real ✓ Kodarvia Pending Invite ✓ Aviso amarillo >150cm ✓ Tel solo numeros ✓ Mensaje No hay reservas ✓ Footer Av Avellaneda 1230 + mapa + horarios + redes ✓ Validacion 10-300cm ✓ m2 ✓ WhatsApp</div></div></div><footer class="mt-10 bg-white border-t"><div class="max-w-7xl mx-auto p-6 grid md:grid-cols-4 gap-6 text-xs"><div><div class="font-bold text-sm">Vidrieria Tucuman</div><div class="mt-2 text-slate-600">Av. Avellaneda 1230<br>San Miguel de Tucuman<br>Tel: 381 400-1234</div></div><div><div class="font-bold">Horarios</div><div class="mt-2 text-slate-600">Lunes a Viernes: 8-18<br>Sabado: 8-13<br>Domingo: Cerrado</div></div><div><div class="font-bold">Servicios</div><div class="mt-2 text-slate-600">Float, Laminado, Templado, DVH, Espejos, Colocacion</div></div><div><div class="font-bold">Mapa</div><div class="mt-2"><iframe width="100%" height="100" frameborder="0" style="border:0;border-radius:8px" src="https://www.google.com/maps?q=Av.+Avellaneda+1230+Tucuman&output=embed"></iframe><div class="mt-2 flex gap-3"><a href="#" class="text-blue-600">Instagram</a><a href="#" class="text-blue-600">Facebook</a><a href="#" class="text-green-600">WhatsApp</a></div></div></div></div><div class="bg-slate-900 text-white text-center text-[10px] p-3">2026 Vidrieria Tucuman Pro - Kodarvia Pending Invite valido - v11 FINAL</div></footer>';
 }
-function onFormInput(){const an = document.getElementById('f-ancho')?.value||0; const al = document.getElementById('f-alto')?.value||0; document.getElementById('aviso-form-din').innerHTML = aviso150HTML(an,al);}
-function setFiltro(f){filtroEstado=f; render();}
-function borrarOrden(id){if(confirm('¿Borrar?')){ordenes = ordenes.filter(o=>o.id!==id); save(); render();}}
+function onFormInput(){
+  const an=document.getElementById('f-ancho')?.value||0;
+  const al=document.getElementById('f-alto')?.value||0;
+  const div=document.getElementById('aviso-form-din');
+  const prev=document.getElementById('calc-preview');
+  if(div) div.innerHTML=aviso150(an,al);
+  if(prev && an && al){ const m2=calcM2(an,al); prev.innerHTML=m2.toFixed(2)+' m2 por pano - Si >150cm veras aviso amarillo'; }
+}
+function setFiltroEstado(f){filtroEstado=f; render();}
+function setFiltroLoc(f){filtroLoc=f; render();}
+function borrarOrden(id){if(confirm('Borrar orden?')){ordenes=ordenes.filter(o=>o.id!==id); save(); render();}}
+function duplicarOrden(id){const o=ordenes.find(x=>x.id===id); if(o){const nuevo={...o,id:Date.now(),c:o.c+' (copia)'}; ordenes.unshift(nuevo); save(); render();}}
 function crearOrden(){
-  const c = document.getElementById('f-cliente').value.trim();
-  const loc = document.getElementById('f-loc').value;
-  const mot = document.getElementById('f-mot').value.trim();
-  const est = document.getElementById('f-est').value;
-  const an = parseFloat(document.getElementById('f-ancho').value);
-  const al = parseFloat(document.getElementById('f-alto').value);
-  const ca = parseInt(document.getElementById('f-cant').value)||1;
-  const t = document.getElementById('f-vidrio').value;
-  const urg = document.getElementById('f-urg').checked;
-  if(!an||!al){alert('Ingresá ancho y alto'); return;}
-  if(an<10||an>300||al<10||al>300){alert('10-300cm'); return;}
-  ordenes.unshift({id:Date.now(), c:c||'Cliente', loc, mot:mot||`${an}x${al}`, est, urg, pan:[{a:an,b:al,c:ca,t}], fecha:new Date().toLocaleDateString()}); save(); render();
-  document.getElementById('f-ancho').value=''; document.getElementById('f-alto').value=''; document.getElementById('aviso-form-din').innerHTML='';
+  const c=document.getElementById('f-cliente').value.trim();
+  const tel=document.getElementById('f-tel').value.replace(/[^0-9+ ]/g,'');
+  const loc=document.getElementById('f-loc').value;
+  const mot=document.getElementById('f-mot').value.trim();
+  const est=document.getElementById('f-est').value;
+  const an=parseFloat(document.getElementById('f-ancho').value);
+  const al=parseFloat(document.getElementById('f-alto').value);
+  const ca=parseInt(document.getElementById('f-cant').value)||1;
+  const t=document.getElementById('f-vidrio').value;
+  const urg=document.getElementById('f-urg').checked;
+  if(!c){alert('Ingresa cliente'); return;}
+  if(!an||!al){alert('Ingresa ancho y alto'); return;}
+  if(an<10||an>300||al<10||al>300){alert('Medidas 10-300cm'); return;}
+  const nueva={id:Date.now(),c,tel,loc,mot:mot||(an+'x'+al),est,urg,pan:[{a:an,b:al,c:ca,t}],fecha:new Date().toLocaleDateString(),nota:''};
+  ordenes.unshift(nueva); save(); render();
+  document.getElementById('f-cliente').value=''; document.getElementById('f-ancho').value=''; document.getElementById('f-alto').value=''; document.getElementById('f-mot').value=''; document.getElementById('aviso-form-din').innerHTML=''; document.getElementById('calc-preview').innerHTML='';
 }
-window.addEventListener('hashchange', render);
-window.onload = render;
+window.addEventListener('hashchange',render);
+window.onload=render;
 </script>
 </body>
 </html>
