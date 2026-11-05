@@ -33,19 +33,12 @@ if(editId!==null){let o=ORDENES.find(x=>x.id===editId);let isReadOnly=o.estado==
 root.innerHTML=html;
 setTimeout(()=>{let an=document.getElementById('pAn'),al=document.getElementById('pAl'),cant=document.getElementById('pCant'),tipo=document.getElementById('pTipo');function upd(){if(!an||!al)return;let p={ancho:parseFloat(an.value)||0,alto:parseFloat(al.value)||0,tipo:tipo.value,cant:parseInt(cant.value)||1};if(p.ancho>0&&p.alto>0){let c=calcPano(p);let s=document.getElementById('pSub');if(s)s.innerText=c.sub.toLocaleString('es-AR');}}if(an){['input','change'].forEach(ev=>{an.addEventListener(ev,upd);al.addEventListener(ev,upd);cant.addEventListener(ev,upd);tipo.addEventListener(ev,upd);});upd();}},50);
 }
-function nuevaOrden(){let id=Math.max(...ORDENES.map(o=>o.id))+1;let o={id,cliente:'',cel:'',loc:LOCALIDADES[0],dir:'',motivo:'',urg:false,prov:false,fMed:'',coloc:false,desc:0,notas:'',estado:'Pedido recibido',panos:[],created:Date.now()};ORDENES.unshift(o);save();editarOrden(id);}
-function editarOrden(id){editId=id;tempPanos=[...ORDENES.find(o=>o.id===id).panos];tempForm={tipo:'f4',ancho:'',alto:'',cant:1};render();}
-function cerrarModal(){editId=null;tempPanos=[];showRechazo=false;render();}
-function agregarPano(){let an=parseFloat(document.getElementById('pAn').value),al=parseFloat(document.getElementById('pAl').value),cant=parseInt(document.getElementById('pCant').value)||1,tipo=document.getElementById('pTipo').value;let err=document.getElementById('pErr');if(!an||!al||an<=0||al<=0||an>500||al>500){err.innerText='Medidas fuera de rango (0-500 cm). No se guarda.';return;}if(cant<=0){err.innerText='Cantidad >=1';return;}err.innerText='';tempForm={tipo,ancho:an,alto:al,cant};tempPanos.push({ancho:an,alto:al,tipo,cant});document.getElementById('pAn').value='';document.getElementById('pAl').value='';render();}
-function quitarPano(i){tempPanos.splice(i,1);render();}
-function guardarOrden(){let o=ORDENES.find(x=>x.id===editId);if(o){o.cliente=document.getElementById('fCliente').value||'Sin nombre';}localStorage.setItem('ordenes',JSON.stringify(ORDENES));cerrarModal();}
-function borrarFicha(){if(!confirm('¿Borrar esta ficha?'))return;ORDENES=ORDENES.filter(x=>x.id!==editId);localStorage.setItem('ordenes',JSON.stringify(ORDENES));cerrarModal();}
-function yaTengoMedidas(){let o=ORDENES.find(x=>x.id===editId);if(o.estado==='Pedido recibido')document.getElementById('fEstado').value='Presupuestada';o.fMed='';}
-function compartirWA(){let txt=document.getElementById('fWA').value;window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');}
-function descargarICS(){let o=ORDENES.find(x=>x.id===editId);let f=o.fMed||new Date().toISOString().slice(0,10);let dt=f.replace(/-/g,'');let ics=`BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nDTSTART:${dt}T100000\nDTEND:${dt}T110000\nSUMMARY:Medición vidriería - ${o.cliente}\nLOCATION:${o.loc} ${o.dir}\nDESCRIPTION:${o.motivo}\nEND:VEVENT\nEND:VCALENDAR`;let blob=new Blob([ics],{type:'text/calendar'});let a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`medicion-${o.id}.ics`;a.click();}
-function guardarCfg(){CFG.min=parseFloat(document.getElementById('cfgMin').value)||0.25;CFG.coloc=parseFloat(document.getElementById('cfgCol').value)||30000;save();alert('Guardado. Mínimo: '+CFG.min+' m²');vista='ordenes';location.hash='';render();}
-window.nuevaOrden=nuevaOrden;window.editarOrden=editarOrden;window.cerrarModal=cerrarModal;window.agregarPano=agregarPano;window.quitarPano=quitarPano;window.guardarOrden=guardarOrden;window.yaTengoMedidas=yaTengoMedidas;window.compartirWA=compartirWA;window.descargarICS=descargarICS;window.guardarCfg=guardarCfg;
-render();if(isHashAdmin){vista='admin';render();}
-</script>
-</body>
-</html>
+function nuevaOrden(){editId=Date.now();ORDENES.push({id:editId,cliente:'',cel:'',direccion:'',panos:[]});editarOrden(editId);}
+function editarOrden(id){editId=id;let o=ORDENES.find(x=>x.id===id);if(!o)return;document.getElementById('fCliente').value=o.cliente||'';let m=document.getElementById('modal');if(m)m.style.display='block';}
+function cerrarModal(){let m=document.getElementById('modal');if(m)m.style.display='none';location.reload();}
+function agregarPano(){let o=ORDENES.find(x=>x.id===editId);if(!o)return;o.panos.push({ancho:'',alto:''});editarOrden(editId);}
+function quitarPano(i){let o=ORDENES.find(x=>x.id===editId);if(!o)return;o.panos.splice(i,1);editarOrden(editId);}
+function guardarOrden(){let o=ORDENES.find(x=>x.id===editId);if(o){o.cliente=document.getElementById('fCliente').value||'Sin nombre';}localStorage.setItem('ordenes',JSON.stringify(ORDENES));localStorage.setItem('vt_ordenes',JSON.stringify(ORDENES));cerrarModal();}
+function borrarFicha(){if(!confirm('¿Borrar esta ficha? Esta acción no se puede deshacer.'))return;ORDENES=ORDENES.filter(x=>x.id!==editId);localStorage.setItem('ordenes',JSON.stringify(ORDENES));localStorage.setItem('vt_ordenes',JSON.stringify(ORDENES));cerrarModal();}
+function yaTengoMedidas(){let o=ORDENES.find(x=>x.id===editId);if(o)o.medidas='si';}
+function confirmarMedidas(){let o=ORDENES.find(x=>x.id===editId);if(o)o.medidasConfirmadas=true;localStorage.setItem('ordenes',JSON.stringify(ORDENES));localStorage.setItem('vt_ordenes',JSON.stringify(ORDENES));}
