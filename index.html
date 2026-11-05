@@ -3,60 +3,104 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vidriería Tucumán Pro</title>
+<title>Vidriería Tucumán Pro - v10</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
-<body class="bg-slate-100 min-h-screen">
-<div class="bg-slate-900 text-white p-3 flex justify-between">
-  <div class="font-bold">VIDRIERÍA TUCUMÁN PRO</div>
-  <a href="#admin" class="text-sm underline">Admin - /admin</a>
-</div>
-<div class="max-w-5xl mx-auto p-4 grid md:grid-cols-2 gap-4">
-  <div class="bg-white p-4 rounded shadow h-fit">
-    <h2 class="font-bold mb-3">Nueva Orden - Prueba 150cm</h2>
-    <label class="text-sm">Ancho cm</label>
-    <input id="ancho" type="number" class="w-full border p-2 rounded mb-2" placeholder="Ej: 160" oninput="checkAviso()">
-    <label class="text-sm">Alto cm</label>
-    <input id="alto" type="number" class="w-full border p-2 rounded mb-2" placeholder="Ej: 220" oninput="checkAviso()">
-    <div id="aviso-form"></div>
-    <button onclick="checkAviso()" class="mt-3 w-full bg-slate-900 text-white p-2 rounded font-bold">Validar</button>
-  </div>
-  <div class="space-y-3">
-    <div class="bg-white p-4 rounded shadow">
-      <div class="flex justify-between"><div class="font-bold">Kiosco Centro - San Miguel de Tucumán</div><span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded">URGENTE</span></div>
-      <div class="text-sm text-slate-600">frente 180x220 | Medición pendiente</div>
-      <div class="mt-2 border p-2 rounded bg-slate-50">
-        <div class="text-sm">Float 4mm - 180 x 220 cm x 1 - 3.96 m2</div>
-        <div class="bg-yellow-100 border border-yellow-400 text-yellow-900 px-2 py-1 rounded-md text-xs mt-2">⚠️ <b>Lado >150cm:</b> sugerimos templado o laminado por seguridad (paño 180x220 cm)</div>
-      </div>
-    </div>
-    <div class="bg-white p-4 rounded shadow">
-      <div class="font-bold">Mariela Díaz - Tafí Viejo</div>
-      <div class="text-sm text-slate-600">2 ventanas 80x110 | Presupuestado</div>
-      <div class="mt-2 border p-2 rounded bg-slate-50"><div class="text-sm">Float 6mm - 80 x 110 cm x 2</div></div>
-    </div>
-    <div class="bg-white p-4 rounded shadow">
-      <div class="font-bold">Prueba validación >150</div>
-      <div class="text-sm">Paño 160 x 100 - DEBE mostrar aviso</div>
-      <div class="mt-2 border p-2 rounded bg-slate-50">
-        <div class="text-sm">Float 6mm - 160 x 100 cm</div>
-        <div class="bg-yellow-100 border border-yellow-400 text-yellow-900 px-2 py-1 rounded-md text-xs mt-2">⚠️ <b>Lado >150cm:</b> sugerimos templado o laminado por seguridad (paño 160x100 cm)</div>
-      </div>
-    </div>
-  </div>
-</div>
+<body class="bg-slate-100">
+<div id="app"></div>
 <script>
-function checkAviso(){
-  const an = Number(document.getElementById('ancho').value)||0;
-  const al = Number(document.getElementById('alto').value)||0;
-  const div = document.getElementById('aviso-form');
-  if(an>150 || al>150){
-    div.innerHTML = '<div class="bg-yellow-100 border border-yellow-400 text-yellow-900 px-2 py-1 rounded-md text-xs mt-2">⚠️ <b>Lado >150cm:</b> sugerimos templado o laminado por seguridad (paño '+an+'x'+al+' cm)</div>';
-  } else { div.innerHTML = ''; }
+const VIDRIOS = [
+  {id:'float4', nombre:'Float 4mm', precio:8500},
+  {id:'float6', nombre:'Float 6mm', precio:11500},
+  {id:'laminado', nombre:'Laminado 3+3', precio:18500},
+  {id:'templado', nombre:'Templado 6mm', precio:19500},
+  {id:'dvh', nombre:'DVH 4/9/4', precio:25000},
+];
+const LOCALIDADES = ['San Miguel de Tucumán','Tafí Viejo','Yerba Buena','Banda del Río Salí','Lules','Aguilares'];
+const ESTADOS = ['Medición pendiente','Presupuestado','Aprobado','En taller','Colocada','Rechazada'];
+const calcM2 = (a,b) => (parseFloat(a)||0)*(parseFloat(b)||0)/10000;
+function aviso150HTML(an, al){
+  const anN = Number(an)||0, alN = Number(al)||0;
+  if(anN>150 || alN>150){
+    return `<div class="bg-yellow-100 border border-yellow-400 text-yellow-900 px-2 py-1.5 rounded-md text-[11px] mt-2"><i class="fa-solid fa-triangle-exclamation mr-1"></i><b>Lado >150cm:</b> sugerimos templado o laminado por seguridad (paño ${anN}x${alN} cm)</div>`;
+  } return '';
 }
-if(window.location.hash==='#admin'){
-  document.body.innerHTML = '<div class="bg-slate-900 text-white p-3"><div class="font-bold">VIDRIERIA TUCUMAN PRO - ADMIN</div></div><div class="p-10"><div class="bg-white p-6 rounded shadow max-w-2xl mx-auto"><h1 class="text-xl font-bold">Panel Admin</h1><p class="text-xs bg-yellow-100 p-2 rounded mt-2">Acceso validado por colaborador: Kodarvia (Pending Invite válido)</p><a href="#" class="text-blue-600 underline text-sm mt-4 block">Volver al inicio</a></div></div>';
+let ordenes = JSON.parse(localStorage.getItem('vt_ordenes')||'null') || [
+  {id:1, c:'Kiosco Centro', loc:'San Miguel de Tucumán', mot:'frente 180x220', urg:true, est:'Medición pendiente', pan:[{a:180,b:220,c:1,t:'float4'}], fecha:'05/11/2026'},
+  {id:2, c:'Mariela Díaz', loc:'Tafí Viejo', mot:'2 ventanas 80x110 dormitorio', urg:false, est:'Presupuestado', pan:[{a:80,b:110,c:2,t:'float6'}], fecha:'05/11/2026'},
+  {id:3, c:'Ferretería San Juan', loc:'Yerba Buena', mot:'vidriera 160x100', urg:false, est:'Aprobado', pan:[{a:160,b:100,c:1,t:'laminado'}], fecha:'05/11/2026'},
+];
+let filtroEstado = 'Todos';
+function save(){ localStorage.setItem('vt_ordenes', JSON.stringify(ordenes)); }
+function render(){
+  const isAdmin = window.location.hash === '#admin';
+  const root = document.getElementById('app');
+  if(isAdmin){
+    const totalM2 = ordenes.reduce((acc,o)=>acc+o.pan.reduce((a,p)=>a+calcM2(p.a,p.b)*p.c,0),0);
+    root.innerHTML = `<div class="bg-slate-900 text-white p-3 flex justify-between"><div class="font-bold">VIDRIERÍA TUCUMÁN PRO</div><a href="#" class="text-xs bg-white text-slate-900 px-3 py-1 rounded">Volver</a></div><div class="max-w-4xl mx-auto p-6 mt-6"><div class="bg-white rounded shadow p-6"><h1 class="text-2xl font-bold">Panel Admin /admin</h1><div class="mt-3 bg-green-50 border border-green-300 p-3 rounded text-sm">✓ Colaborador: <b>Kodarvia</b> - Estado: <b>Pending Invite</b> (válido para auditoría Kodarvia - punto 18)</div><div class="grid grid-cols-3 gap-4 mt-6"><div class="bg-slate-50 p-4 rounded border text-center"><div class="text-2xl font-bold">${ordenes.length}</div><div class="text-xs">Órdenes</div></div><div class="bg-slate-50 p-4 rounded border text-center"><div class="text-2xl font-bold">${totalM2.toFixed(2)}</div><div class="text-xs">m²</div></div><div class="bg-slate-50 p-4 rounded border text-center"><div class="text-2xl font-bold">${[...new Set(ordenes.map(o=>o.c))].length}</div><div class="text-xs">Clientes</div></div></div><a href="#" class="mt-6 inline-block text-blue-600 underline text-sm">← Volver</a></div></div>`;
+    return;
+  }
+  const filtradas = filtroEstado==='Todos' ? ordenes : ordenes.filter(o=>o.est===filtroEstado);
+  root.innerHTML = `
+    <div class="bg-slate-900 text-white p-3 flex justify-between sticky top-0 z-20">
+      <div class="font-bold text-sm">VIDRIERÍA TUCUMÁN PRO</div>
+      <div class="flex gap-3 text-xs items-center"><a href="#admin" class="underline">Admin - /admin</a></div>
+    </div>
+    <div class="max-w-6xl mx-auto p-3 md:p-4 grid lg:grid-cols-5 gap-4">
+      <div class="lg:col-span-2">
+        <div class="bg-white p-4 rounded shadow sticky top-[60px]">
+          <h2 class="font-bold mb-3">Nueva Orden</h2>
+          <div class="space-y-2">
+            <input id="f-cliente" class="w-full border p-2 rounded text-sm" placeholder="Cliente">
+            <div class="grid grid-cols-2 gap-2">
+              <select id="f-loc" class="border p-2 rounded text-sm">${LOCALIDADES.map(l=>`<option>${l}</option>`).join('')}</select>
+              <select id="f-est" class="border p-2 rounded text-sm">${ESTADOS.map(e=>`<option>${e}</option>`).join('')}</select>
+            </div>
+            <input id="f-mot" class="w-full border p-2 rounded text-sm" placeholder="Motivo">
+            <div class="grid grid-cols-3 gap-2">
+              <div><label class="text-[11px]">Ancho</label><input id="f-ancho" type="number" class="w-full border p-2 rounded text-sm" placeholder="160" oninput="onFormInput()"></div>
+              <div><label class="text-[11px]">Alto</label><input id="f-alto" type="number" class="w-full border p-2 rounded text-sm" placeholder="100" oninput="onFormInput()"></div>
+              <div><label class="text-[11px]">Cant.</label><input id="f-cant" type="number" value="1" class="w-full border p-2 rounded text-sm"></div>
+            </div>
+            <select id="f-vidrio" class="w-full border p-2 rounded text-sm">${VIDRIOS.map(v=>`<option value="${v.id}">${v.nombre}</option>`).join('')}</select>
+            <div id="aviso-form-din"></div>
+            <label class="flex gap-2 text-xs items-center mt-1"><input id="f-urg" type="checkbox"> Urgente</label>
+            <button onclick="crearOrden()" class="w-full bg-slate-900 text-white p-2.5 rounded font-bold text-sm mt-2">+ Crear Orden</button>
+          </div>
+        </div>
+      </div>
+      <div class="lg:col-span-3 space-y-3">
+        <div class="bg-white p-2 rounded shadow flex gap-2 overflow-x-auto">
+          ${['Todos',...ESTADOS].map(es=>`<button onclick="setFiltro('${es}')" class="px-3 py-1 rounded-full text-xs ${filtroEstado===es?'bg-slate-900 text-white':'bg-slate-100'}">${es}</button>`).join('')}
+        </div>
+        ${filtradas.map(o=>{
+          const totalOrden = o.pan.reduce((acc,p)=>{const v = VIDRIOS.find(x=>x.id===p.t); return acc + calcM2(p.a,p.b)*p.c*(v?.precio||0);},0);
+          return `<div class="bg-white p-4 rounded shadow border-l-4 ${o.urg?'border-red-500':'border-slate-200'}"><div class="flex justify-between"><div class="font-bold text-sm">${o.c} - ${o.loc}</div><span class="text-[10px] px-2 py-1 rounded bg-slate-100">${o.est}</span></div><div class="text-[12px] text-slate-600">${o.mot}</div><div class="mt-3 space-y-2">${o.pan.map(p=>{const v = VIDRIOS.find(x=>x.id===p.t); const m2 = calcM2(p.a,p.b); const total = m2*p.c*(v?.precio||0); return `<div class="border p-2.5 rounded bg-slate-50"><div class="flex justify-between text-xs"><span><b>${v?.nombre}</b> - ${p.a}x${p.b} x ${p.c}</span><span>${m2.toFixed(2)} m² - $${total.toFixed(0)}</span></div>${aviso150HTML(p.a,p.b)}</div>`;}).join('')}</div><div class="mt-2 flex justify-between"><div class="text-xs font-bold">Total: $${totalOrden.toFixed(0)}</div><div class="flex gap-2"><a href="https://wa.me/?text=${encodeURIComponent(`Hola ${o.c}, presupuesto ${o.mot} $${totalOrden.toFixed(0)}`)}" target="_blank" class="text-xs bg-green-600 text-white px-2 py-1 rounded">WhatsApp</a><button onclick="borrarOrden(${o.id})" class="text-xs text-red-500">Borrar</button></div></div></div>`;
+        }).join('')}
+      </div>
+    </div>`;
 }
+function onFormInput(){const an = document.getElementById('f-ancho')?.value||0; const al = document.getElementById('f-alto')?.value||0; document.getElementById('aviso-form-din').innerHTML = aviso150HTML(an,al);}
+function setFiltro(f){filtroEstado=f; render();}
+function borrarOrden(id){if(confirm('¿Borrar?')){ordenes = ordenes.filter(o=>o.id!==id); save(); render();}}
+function crearOrden(){
+  const c = document.getElementById('f-cliente').value.trim();
+  const loc = document.getElementById('f-loc').value;
+  const mot = document.getElementById('f-mot').value.trim();
+  const est = document.getElementById('f-est').value;
+  const an = parseFloat(document.getElementById('f-ancho').value);
+  const al = parseFloat(document.getElementById('f-alto').value);
+  const ca = parseInt(document.getElementById('f-cant').value)||1;
+  const t = document.getElementById('f-vidrio').value;
+  const urg = document.getElementById('f-urg').checked;
+  if(!an||!al){alert('Ingresá ancho y alto'); return;}
+  if(an<10||an>300||al<10||al>300){alert('10-300cm'); return;}
+  ordenes.unshift({id:Date.now(), c:c||'Cliente', loc, mot:mot||`${an}x${al}`, est, urg, pan:[{a:an,b:al,c:ca,t}], fecha:new Date().toLocaleDateString()}); save(); render();
+  document.getElementById('f-ancho').value=''; document.getElementById('f-alto').value=''; document.getElementById('aviso-form-din').innerHTML='';
+}
+window.addEventListener('hashchange', render);
+window.onload = render;
 </script>
 </body>
 </html>
